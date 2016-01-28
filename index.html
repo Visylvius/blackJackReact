@@ -3,8 +3,27 @@
   <head>
     <meta charset="utf-8">
     <title></title>
-  </head>
-  <body>
-
-  </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.6/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.6/react-dom.js"></script>
+    <script src="main.js"></script>
+    <link rel="stylesheet" href="style.css">
+    </head>
+ <body>
+  <div class="container">
+   <h2 id="result"></h2>
+   <h3 id='current-hand'></h3>
+   <div class="table">
+    <ul class='dealer-cards'>
+  <!-- <li><img class='card-one' alt=""></li>
+  <li class='dealer-card-two'><img class='card-two' alt=""></li> -->
+    </ul>
+    <div id='players'></div>
+    <div class="buttons">
+     <button id="hit">Hit</button>
+     <button id="stand">Stand</button>
+     <button id="new-game">New Game</button>
+    </div>
+   </div>
+  </div>
+ </body>
 </html>
