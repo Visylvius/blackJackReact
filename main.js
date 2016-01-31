@@ -1,7 +1,7 @@
 //Global Variables
 var deck;
 var currentHands;
-
+var hasStood = false;
 //Constructor function, creates ranks and suits for cards.
 // Get Card Image Path Function takes the suit and rank of the class, and then matches it the corresponding jpg file
 // rendering the card image to the DOM
@@ -131,6 +131,7 @@ function sortNumber(a,b) {
 var hit = function() {
   var newCard = dealCard(deck);
   currentHands[1].push(newCard);
+  render();
   //shows what the player's hand value is currently
 
 
@@ -157,6 +158,7 @@ var hit = function() {
     //setting up for while loop
     var dealerHit = true;
     var dealerHand = currentHands[0];
+    hasStood = true;
     // now that the players have finished, the dealers card that was facedown, now gets flipped face up
     // so we take the card that was previously down, and use the getCardImagePath function on it, to render the card to the DOM
     // and show it to the players
@@ -192,6 +194,7 @@ var hit = function() {
         }
       }
     }
+    render();
   };
 //whenever the new game button is clicked, it starts a fresh game. This function also clears any of the previous children from the dealerLi
 // or dynmically created playerLi, and removes them from the DOM
@@ -203,7 +206,8 @@ function newGame() {
   //because we defined deck variable at the top, we can access it within the function, and we use the deck variable within other functions
   deck = shuffle(makeDeck());
   currentHands = dealRound(deck, 1);
-  render(currentHands[0], currentHands[1], true, 0);
+  hasStood = false;
+  render();
 
 }
 
@@ -211,17 +215,59 @@ function newGame() {
 //DOM Event Listeners
 // we set these at the bottom, as they don't get hoisted, like variable declerations do.
 var App = React.createClass({
+	hitHandler: function() {
+   if (this.props.stillPlaying) {
+    hit();
+   }
+
+  },
+  standHandler: function() {
+  	dealerPlays();
+  },
 	render: function() {
+   var playerCardLoop = this.props.player.map(function(e, i) {
+   	return <li key={e.suit + e.rank}><img src={e.getCardImagePath()} /></li>;
+   })
+   var dealerCardLoop = this.props.dealer.map(function(e, i) {
+		return <li key={e.suit + e.rank}><img src={e.getCardImagePath()} /></li>;
+   })
+   var header = null;
+    if (this.props.score > 21) {
+    	header = <h2>you've busted</h2>
+    } else if (!this.props.stillPlaying && this.props.dealerScore > 21) {
+		 header = <h2>The dealer has busted you win!</h2>;
+    } else if (!this.props.stillPlaying && this.props.score < this.props.dealerScore) {
+     header = <h2>The dealer has a better hand, you have lost.</h2>;
+    } else if (!this.props.stillPlaying && this.props.score > this.props.dealerScore) {
+     header = <h2>You have a better hand then the dealer, you win!</h2>;
+    } else {
+    	header = <h2>your score is {this.props.score}</h2>
+    }
+
+
   	return (
-     <div><img src={this.props.player[0].getCardImagePath()}/>{
-     JSON.stringify(this.props)}</div>
+
+     <div>
+      {header}
+      <ul>{dealerCardLoop}</ul>
+      <ul>{playerCardLoop}</ul>
+      <div className="buttons">
+       <button disabled={!this.hitHandler} onClick={this.hitHandler}>Hit</button>
+       <button disabled={!this.props.stillPlaying} onClick={this.standHandler}>Stand</button>
+      </div>
+     </div>
     )
   }
 })
 
-function render(playersHand, dealersHand, stillPlaying, score) {
+function render() {
+	var dealersHand = currentHands[0];
+  var playersHand = currentHands[1];
+  var score = handValue(playersHand);
+  var dealerScore = handValue(dealersHand);
+  var stillPlaying = score < 21 && !hasStood;
   ReactDOM.render(
-   <App player={playersHand} dealer={dealersHand} stillPlaying={stillPlaying} score={score}  />,
+   <App dealer={dealersHand} player={playersHand} stillPlaying={stillPlaying} score={score}  />,
    document.querySelector('.container')
   )
 }
